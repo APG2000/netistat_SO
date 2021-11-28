@@ -75,6 +75,7 @@ while getopts ":bc:lmrRtTv" option;
             ;;
         t)
             order_of_sort="TX"
+
             ;;
         T)
             order_of_sort="TRATE"
@@ -101,7 +102,7 @@ ri=("${rx_atual[@]}")
 ti=("${tx_atual[@]}")
 
 # Exemplo de opções para o Sort
-options="-k 1 -d -r"
+options="-k 2 -n "
 
 # Pausamos o program s segundos para depois medirmos os valores
 sleep $s
