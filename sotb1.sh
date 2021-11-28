@@ -193,7 +193,8 @@ tempo=$3
 case $1 in
     -c)
             #regex=$OPTARG
-    echo "escolheu c"
+    
+    #echo "escolheu c" trash
     
     printlabel $2
     ;;
