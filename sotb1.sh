@@ -170,13 +170,13 @@ for x in "${!dicform[@]}"
         fi
 
         {
-                if [[ $1 -eq 1 ]] #se tem arumento é para loop
+                if [[ $1 -eq 1 ]] #se tem argumento é para loop
                 then
 
-                      visualizar $loop # ultimo e penultimo saõ os valores de rxe tx desde o inicio da execução do programa
+                      visualizar $loop # ultimo e penultimo são os valores de rx e tx desde o inicio da execução do programa
                 fi
 
-                if [[ $1 -le 0 ]]  ##caso a função nem tem argumento não é para loop
+                if [[ $1 -le 0 ]]  ##caso a função não tem argumento não é para loop
                 then
                 visualizar 
                 fi
@@ -235,7 +235,7 @@ function printlabel(){
    
 
     esac
-    printthings | sort $option # sort by argument 2 tha isnt a numeber 
+    printthings | sort $option # sort by argument 2 tha isnt a number 
    fi
     }
 
