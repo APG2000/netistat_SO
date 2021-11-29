@@ -1,11 +1,23 @@
 #!/bin/bash
-#ifconfig -a | sed 's/[ \t].*//;/^$/d' |cut -d ":" -f1 
+#ifconfig -a | sed 's/[ \t].*//;/^$/d' |cut -d ":" -f1  to get interfaces 
+
+assert ()                
+{                        
+
+  if [ $a -le 0 ]
+  then
+    echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
+    exit $E_ASSERT_FAILED
+  # else
+  #   return
+  #   e continua a executar o script.
+  fi  
+}    
 
 
-#echo "${animals[moo]}"
+a=$# #numero de argumestos do script 
+assert 
 
-#animals['moo']+=' value2'
-#animals['moo']+=' value3'
 
 declare -A dicform
 
@@ -28,29 +40,96 @@ dicform[$i]=$(ifconfig $i |sort |grep packets | grep TX |awk  '{print $5}')
 
 dicform[$i]+=":"$(ifconfig $i |sort |grep packets | grep RX |awk  '{print $5}')     #'{print $3}' is to access the collum with the value that we want 
 
-
-#printf "%-10s\t%10s\t%10s\n" $i  $tx $rx  #print all interface and its values 
-
 done
 }
-
-#animals[$x]='values after'
-
 
 #|cut --complement -d ":" -f 1  # this cut the complement of an : ou seja a segunda parte
 # awk '{print $2}' | cut -d ":" -f1 corta o primeiro
 
-
 function getxrx(){
-
-
-#echo $1
 
 rx=$(ifconfig $1 |sort |grep packets | grep RX |awk  '{print $5}') #'{print $3}' is to access the collum with the value that we want 
 tx=$(ifconfig $1 |sort |grep packets | grep TX |awk  '{print $5}')
 
 }
 
+function visualizar(){
+
+
+case $opv in 
+
+-m)
+
+
+  if [[ $1 -ge 0 ]] 
+  then
+  {
+    ## to convert the number to mb
+#echo "scale=2; 10000 / 1024" | bc
+
+  #txfi=$(echo "scale=2;  $txf / 1024" | bc) # bash nao suporta divisao com floats  so i... found this  /1000 desloca virgula 3x so que fica com x,xx nao func
+  txfi=$(bc <<< 'scale=2; '$(echo "scale=2;  $txf / 1024" | bc)'/100') #this is better than the other fica x.x
+
+  #rxfi=$(echo "scale=2;  $rxf / 1024" | bc)
+  rxfi=$(bc <<< 'scale=2; '$(echo "scale=2;  $rxf / 1024" | bc)'/100')
+
+  #txrate2i=$(echo "scale=2;  $txrate2 / 1024" | bc)
+  txrate2i=$(bc <<< 'scale=2; '$(echo "scale=2;  $txrate2 / 1024" | bc)'/100') #converte para megabytes e divide por 100 para deslocar virgula
+
+  #rxrate2i=$(echo "scale=2;  $rxrate2 / 1024" | bc) 
+
+  rxrate2i=$(bc <<< 'scale=2; '$(echo "scale=2;  $rxrate2 / 1024" | bc)'/100')
+
+
+  #tx=$(echo "scale=2;  $tx / 1024" | bc) 
+  tx=$(bc <<< 'scale=2; '$(echo "scale=2;  $tx / 1024" | bc)'/100')
+
+  #rx=$(echo "scale=2;  $rx / 1024" | bc) 
+
+  rx=$(bc <<< 'scale=2; '$(echo "scale=2;  $rx / 1024" | bc)'/100')
+
+
+  TXTOT2=$(bc <<< 'scale=2; '$tx'*1')
+
+  RXTOT2=$(bc <<< 'scale=2; '$rx'*1')
+
+  if [[ $1 -eq 1 ]]
+  then
+  printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$x"  "$txfi MB" "$rxfi Mb"  "$txrate2i"  "$rxrate2i MB" "$TXTOT2 MB" "$RXTOT2 MB"
+  
+  else
+    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$x"  "$txfi MB" "$rxfi Mb"  "$txrate2i MB"  "$rxrate2i MB" 
+
+  fi
+
+  }
+  
+fi
+
+  #printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" $x "$txfi MB" "$rxfi Mb" "$txrate2i MB" "$rxrate2i MB"   #print all interface and its values 
+  ;;
+
+
+
+
+-k)
+  printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" $x "$(($txf/1000)) KB" "$(($rxf/1000)) KB" "$(($txrate2/1000)) KB" "$(($rxrate2/1000)) KB"
+
+;;
+
+-b)
+printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" $x  "$txf B" "$rxf B"  "$txrate2 B" "$rxrate2 B"
+
+;;
+
+*)
+
+echo error 
+;;
+esac
+
+
+}
 
 function printthings(){
 #printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "NETIF" "TX" "RX" "TRATE" "RRATE"
@@ -60,56 +139,53 @@ sleep $tempo
 
 for x in "${!dicform[@]}" 
 
-do 
+    do 
+    {
+        getxrx $x #$tempo #segundo argumento é o valor que se tem de passar ao getrxtx para poder dar sleep
+
+        #echo $x ${animals[$x]}
+        #txf e rxf =primeiro valor de tx e rx que é quando a função getintefaces é chamada
+        # tx e fx x= ultimo valor de tx xe rx quando a função gettxrx é chamada
 
 
-getxrx $x #$tempo #segundo argumento é o valor que se tem de passar ao getrxtx para poder dar sleep
+        tab="$x ${dicform[$x]} "          #|cut --complement -d ":" -f 1  #| awk '{print $2}' | cut -d ":" -f1
+        txf=$(echo $tab | grep $x | awk '{print $2}' | cut -d ":" -f1 )
+        rxf=$(echo $tab | grep $x | awk '{print $2}' | cut --complement -d ":" -f1 )
+
+        ##get rx and tx final after slep
+        txrate=$(($txf-$tx))  #$tempo
+        rxrate=$(($rxf-$tx)) #$tempo
+
+        txrate2=$(($txrate/$tempo ))
+        rxrate2=$(($rxrate/$tempo ))
+
+        if [ $txrate2 -le 0 ]
+        then 
+        txrate2=$tx
+        fi
+
+        if [ $rxrate2 -le 0 ] 
+        then
+        rxrate2=$rx
+        fi
+
+        {
+                if [[ $1 -eq 1 ]] #se tem arumento é para loop
+                then
+
+                      visualizar $loop # ultimo e penultimo saõ os valores de rxe tx desde o inicio da execução do programa
+                fi
+
+                if [[ $1 -le 0 ]]  ##caso a função nem tem argumento não é para loop
+                then
+                visualizar 
+                fi
+
+        }
 
 
-
-
-#echo $x ${animals[$x]}
-
-tab="$x ${dicform[$x]} "          #|cut --complement -d ":" -f 1  #| awk '{print $2}' | cut -d ":" -f1
-txinicial=$(echo $tab | grep $x | awk '{print $2}' | cut -d ":" -f1 )
-rxinicial=$(echo $tab | grep $x | awk '{print $2}' | cut --complement -d ":" -f1 )
-
-
-##get rx and tx final after slep
-
-
-
-txrate=$(($txinicial-$tx))  #$tempo
-
-rxrate=$(($rxinicial-$tx)) #$tempo
-
-
-txrate2=$(($txrate/$tempo ))
-rxrate2=$(($rxrate/$tempo ))
-if [ $txrate2 -le 0 ]
-then 
-txrate2=$tx
-fi
-
-if [ $rxrate2 -le 0 ] 
-then
-rxrate2=$rx
-fi
-
-{
-if [[ $1 -eq 1 ]]
-then
-      printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" $x  $txinicial $rxinicial  $txrate2  $rxrate2 $txinicial $rxinicial
-
-else
-
-printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" $x  $txinicial $rxinicial  $txrate2  $rxrate2 #print all interface and its values 
-
-fi
-}
-
-
-done
+    }
+    done
 
 }
 
@@ -124,7 +200,7 @@ function printlabel(){
     if [ $# -le 0 ]
     then 
     print1
-    printthings
+    printthings 
     fi
 
 
@@ -163,7 +239,7 @@ function printlabel(){
    fi
     }
 
-  if [ $# -gt 1 ]  && [ $2 == "-l" ]
+  if [ $# -gt 1 ]  && [ $2 == "-l" ] #-----------------------------------loop here
   then 
     loop=1
       printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "NETIF" "TX" "RX" "TRATE" "RRATE" "TXTOT" "RXTOT"
@@ -178,46 +254,74 @@ function printlabel(){
 
   fi
 
-    
-
 }
-#---main 
+#---main------------------------------Parte de execução do script-------------------------------main
 
-if [ $# -gt 2 ]
-then
+
+echo "Qual a opção de visualização"
+
+x="false"
+  while [ $x != "True" ]
+
+  do
+    echo "escolha entre [-b -m -k]"
+    read x
+
+    if [ $x == "-b" ]
+    then
+    opv="-b"
+    x="True"
+    fi
+
+    if [ $x == "-k" ]
+    then
+    opv="-k"
+    x="True"
+    fi
+
+    if [ $x == "-m" ]
+    then
+      opv="-m"
+      x="True"
+    fi
+
+  done
+
+#----optei por não usar o getops e fiz dessa forma
+#caso o script tenha 3 argumentos
 {
+if [[ $# -gt 2 ]]
+then
 
-echo "arg 1 $1 Arg2 $2 Arg3 $3 " 
 tempo=$3
 
 case $1 in
     -c)
             #regex=$OPTARG
-    
-    #echo "escolheu c" trash
+    #echo "escolheu c"
     
     printlabel $2
     ;;
-
-   
-
-    
-
     esac
 
-}
+
 fi
+}
 
-
+#caso o script tenha 1 argumento que so pode ser o tempo (fazer assert depois )
+{
 if [ $# -eq 1 ]
 then
-{
+
 tempo=$1
-printlabel 
+printlabel
 
-}
 fi
+}
 
+
+#caso o scirpt tenha 2 argumentos (fazer assert depois para validar e deixar o progama sem erro )
+{
 if [ $# -eq 2 ] 
 then
 tempo=$2
@@ -228,21 +332,27 @@ case $1 in
 
    
 
--T)
-printlabel $2 $1
-;;
+  -T)
+  printlabel $2 $1
+  ;;
 
--R)
-printlabel $2 $1
-;;
+  -R)
+  printlabel $2 $1
+  ;;
 
--t)
-printlabel $2 $1 
-;;
--l)
+  -t)
+  printlabel $2 $1 
+  ;;
+  -l)
+    
 
-
-printlabel $2 $1 
+  printlabel $2  $1
+  ;;
 
 esac
 fi
+}
+
+#  i think its all for now ahah
+# depois pode-se melhorar algumas cenas 
+# e falta tirar uma duvida na questão das opções do sort....
