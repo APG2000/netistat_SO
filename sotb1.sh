@@ -327,6 +327,13 @@ x="false"
     fi
 
   done
+  
+  if [[ $x == "True" ]]
+  then
+  clear
+  fi
+  
+  
 
 #----optei por não usar o getops e fiz dessa forma
 #caso o script tenha 3 argumentos
