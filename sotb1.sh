@@ -3,6 +3,21 @@
 
 assert ()                
 {                        
+  re='^[0-9]+$'
+if ! [[ $a1 =~ $re ]] ; then  # se o primeiro argumento nao for um numero e o numero total de argumentos nao for igual ou superior a 2 o programa nao corre
+
+  if [[ $a -lt 2 ]]
+  then
+
+   echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
+    exit $E_ASSERT_FAILED
+
+  fi
+
+
+fi
+
+
 
   if [ $a -le 0 ]
   then
@@ -16,6 +31,7 @@ assert ()
 
 
 a=$# #numero de argumestos do script 
+a1=$1 #primeiro argumento da func
 assert 
 
 
@@ -68,37 +84,37 @@ case $opv in
 #echo "scale=2; 10000 / 1024" | bc
 
   #txfi=$(echo "scale=2;  $txf / 1024" | bc) # bash nao suporta divisao com floats  so i... found this  /1000 desloca virgula 3x so que fica com x,xx nao func
-  txfi=$(bc <<< 'scale=2; '$(echo "scale=2;  $txf / 1024" | bc)'/100') #this is better than the other fica x.x
+  txfi=$(bc <<< 'scale=2; '$(echo "scale=2;  $txf / 1024" | bc)'/10') #this is better than the other fica x.x
 
   #rxfi=$(echo "scale=2;  $rxf / 1024" | bc)
-  rxfi=$(bc <<< 'scale=2; '$(echo "scale=2;  $rxf / 1024" | bc)'/100')
+  rxfi=$(bc <<< 'scale=2; '$(echo "scale=2;  $rxf / 1024" | bc)'/10')
 
   #txrate2i=$(echo "scale=2;  $txrate2 / 1024" | bc)
-  txrate2i=$(bc <<< 'scale=2; '$(echo "scale=2;  $txrate2 / 1024" | bc)'/100') #converte para megabytes e divide por 100 para deslocar virgula
+  txrate2i=$(bc <<< 'scale=2; '$(echo "scale=2;  $txrate2 / 1024" | bc)'/10') #converte para megabytes e divide por 10 para deslocar virgula
 
   #rxrate2i=$(echo "scale=2;  $rxrate2 / 1024" | bc) 
 
-  rxrate2i=$(bc <<< 'scale=2; '$(echo "scale=2;  $rxrate2 / 1024" | bc)'/100')
+  rxrate2i=$(bc <<< 'scale=2; '$(echo "scale=2;  $rxrate2 / 1024" | bc)'/10')
 
 
   #tx=$(echo "scale=2;  $tx / 1024" | bc) 
-  tx=$(bc <<< 'scale=2; '$(echo "scale=2;  $tx / 1024" | bc)'/100')
+  tx=$(bc <<< 'scale=2; '$(echo "scale=2;  $tx / 1024" | bc)'/10')
 
   #rx=$(echo "scale=2;  $rx / 1024" | bc) 
 
-  rx=$(bc <<< 'scale=2; '$(echo "scale=2;  $rx / 1024" | bc)'/100')
+  rx=$(bc <<< 'scale=2; '$(echo "scale=2;  $rx / 1024" | bc)'/10')
 
 
   TXTOT2=$(bc <<< 'scale=2; '$tx'*1')
 
   RXTOT2=$(bc <<< 'scale=2; '$rx'*1')
 
-  if [[ $1 -eq 1 ]]
+  if [[ $1 -eq 1 ]] 
   then
   printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$x"  "$txfi MB" "$rxfi Mb"  "$txrate2i"  "$rxrate2i MB" "$TXTOT2 MB" "$RXTOT2 MB"
   
   else
-    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$x"  "$txfi MB" "$rxfi Mb"  "$txrate2i MB"  "$rxrate2i MB" 
+    printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$x"  "$txfi MB" "$rxfi Mb"  "$txrate2i MB"  "$rxrate2i MB" 
 
   fi
 
@@ -113,12 +129,35 @@ fi
 
 
 -k)
+
+
+
+ 
+
+  if [[ $1 -eq 1 ]]
+  then
+  printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" $x "$(($txf/1000)) KB" "$(($rxf/1000)) KB" "$(($txrate2/1000)) KB" "$(($rxrate2/1000)) KB" "$(($tx/1000)) KB"  "$(($rx/1000)) KB"
+  else
   printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" $x "$(($txf/1000)) KB" "$(($rxf/1000)) KB" "$(($txrate2/1000)) KB" "$(($rxrate2/1000)) KB"
 
+  fi
+
+
+
+
+ 
 ;;
 
 -b)
+
+
+if [[ $1 -eq 1 ]]
+  then
+  printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$x"  "$txf B" "$rxf b"  "$txrate2"  "$rxrate2 B" "$tx B" "$tx B"
+else
+
 printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" $x  "$txf B" "$rxf B"  "$txrate2 B" "$rxrate2 B"
+fi
 
 ;;
 
@@ -170,13 +209,13 @@ for x in "${!dicform[@]}"
         fi
 
         {
-                if [[ $1 -eq 1 ]] #se tem argumento é para loop
+                if [[ $1 -eq 1 ]] #se tem arumento é para loop
                 then
 
-                      visualizar $loop # ultimo e penultimo são os valores de rx e tx desde o inicio da execução do programa
+                      visualizar $loop # ultimo e penultimo saõ os valores de rxe tx desde o inicio da execução do programa
                 fi
 
-                if [[ $1 -le 0 ]]  ##caso a função não tem argumento não é para loop
+                if [[ $1 -le 0 ]]  ##caso a função nem tem argumento não é para loop
                 then
                 visualizar 
                 fi
@@ -235,7 +274,7 @@ function printlabel(){
    
 
     esac
-    printthings | sort $option # sort by argument 2 tha isnt a number 
+    printthings | sort $option # sort by argument 2 tha isnt a numeber 
    fi
     }
 
@@ -255,10 +294,12 @@ function printlabel(){
   fi
 
 }
-#---main------------------------------Parte de execução do script-------------------------------main
+#---main----------------------------------------------------------------------------------Parte de execução do script
 
 
 echo "Qual a opção de visualização"
+
+#echo "Ecolha as opções [-b -m -k]"
 
 x="false"
   while [ $x != "True" ]
@@ -352,7 +393,7 @@ case $1 in
 esac
 fi
 }
-
-#  i think its all for now ahah
-# depois pode-se melhorar algumas cenas 
-# e falta tirar uma duvida na questão das opções do sort....
+# ver a kestao do loop nao dar print direito #solved
+#assert um pouco melhor 
+# depois pode-se melhorar algumas cenas ...
+# e falta tirar uma duvida na questão das opções do sort....????
