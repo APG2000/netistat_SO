@@ -1,3 +1,4 @@
+ifconfig
 # Vai buscar os bytes do ifconfig -- que estão a contar desde o startup
 function get_data_since_startup(){
     readarray rx_atual <<< $(ifconfig |sort | grep RX | grep bytes | awk '{print $5}' )

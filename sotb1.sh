@@ -4,28 +4,21 @@
 assert ()                
 {                        
   re='^[0-9]+$'
-if ! [[ $a1 =~ $re ]] ; then  # se o primeiro argumento nao for um numero e o numero total de argumentos nao for igual ou superior a 2 o programa nao corre
+  if ! [[ $a1 =~ $re ]] ; then  # se o primeiro argumento nao for um numero e o numero total de argumentos nao for igual ou superior a 2 o programa nao corre
 
-  if [[ $a -lt 2 ]]
-  then
-
-   echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
-    exit $E_ASSERT_FAILED
+    if [[ $a -lt 2 ]] ; then
+      echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
+      exit $E_ASSERT_FAILED
+    fi
 
   fi
 
-
-fi
-
-
-
-  if [ $a -le 0 ]
-  then
+  if [ $a -le 0 ] ; then
     echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
     exit $E_ASSERT_FAILED
-  # else
-  #   return
-  #   e continua a executar o script.
+    # else
+    # return
+    # e continua a executar o script.
   fi  
 }    
 
@@ -37,29 +30,24 @@ assert
 
 declare -A dicform
 
-dicform=()
+dicform=() # dados
 interfaces=()
 
 function getinterfaces(){
+  for xi in $(cat /proc/net/dev | awk '{print $1}' | grep -E "Inter|face" -v | cut -d ":" -f1) ; do # assim as interfaces vem pela ordem que foram adicionadas
+    #echo $xi
+    interfaces+=($xi)
+  done 
 
-# Add new element at the end of the array
-for xi in $(ifconfig -a | sed 's/[ \t].*//;/^$/d' |cut -d ":" -f1 ) ## nome dos interfaces 
-do 
-#echo $xi
-interfaces+=($xi)
-done 
+  for i in "${interfaces[@]}" ; do
+      #printf "%-10s\t%10s\t%10s\n" $i  $tx $rx
+      dicform[$i]=$(ifconfig $i |sort |grep packets | grep TX |awk  '{print $5}')  
+      dicform[$i]+=":"$(ifconfig $i |sort |grep packets | grep RX |awk  '{print $5}')
 
-for i in "${interfaces[@]}"
-do
-     #printf "%-10s\t%10s\t%10s\n" $i  $tx $rx
-dicform[$i]=$(ifconfig $i |sort |grep packets | grep TX |awk  '{print $5}')  
-
-dicform[$i]+=":"$(ifconfig $i |sort |grep packets | grep RX |awk  '{print $5}')     #'{print $3}' is to access the collum with the value that we want 
-
-done
+  done
 }
 
-#|cut --complement -d ":" -f 1  # this cut the complement of an : ou seja a segunda parte
+# |cut --complement -d ":" -f 1  # this cut the complement of an : ou seja a segunda parte
 # awk '{print $2}' | cut -d ":" -f1 corta o primeiro
 
 function getxrx(){
@@ -401,6 +389,6 @@ esac
 fi
 }
 # ver a kestao do loop nao dar print direito #solved
-#assert um pouco melhor 
+# assert um pouco melhor 
 # depois pode-se melhorar algumas cenas ...
 # e falta tirar uma duvida na questão das opções do sort....????
