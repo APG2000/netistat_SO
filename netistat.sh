@@ -208,7 +208,6 @@ for i in "${interfaces[@]}"; do
     dicform_i[$i]+=":"$(ifconfig $i | sort | grep packets | grep RX | awk '{print $5}')
     dicform_r[$i]=$(ifconfig $i | sort | grep packets | grep TX | awk '{print $5}')
     dicform_r[$i]+=":"$(ifconfig $i | sort | grep packets | grep RX | awk '{print $5}')
-    echo ${dicform_r[$i]}
 done
 sleep $s
 while true ; do
