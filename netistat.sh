@@ -1,5 +1,12 @@
+#!/bin/bash
 # Vai bustar o fincheiro para o print inicial
 
+#inclui o ficheiro para printar com fonts
+#DIR="${BASH_SOURCE%/*}"
+#if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+#. "$DIR/fonts.sh"
+
+#exitcode=$?
 
 assert() { #verifica a quantidade de argumentos
     re='^[0-9]+$'
@@ -76,17 +83,20 @@ function print_dados() {
     
         tx_f=$(echo $linha_f | grep $i | awk '{print $2}' | cut -d ":" -f1)
 
-        let r_total=rx_f-r_inicial
-        
 
-        let t_total=tx_f-t_inicial
+        r_total=$(echo $linha_r | grep $i | awk '{print $2}' | cut --complement -d ":" -f1)
+    
+        t_total=$(echo $linha_r | grep $i | awk '{print $2}' | cut -d ":" -f1)
         
-
+        
         
 
         let rx=rx_f-rx_i
      
         let tx=tx_f-tx_i
+
+
+        
 
         
         
@@ -94,7 +104,8 @@ function print_dados() {
         rr=$( bc <<< "scale=2; $rx / $s" )
         tr=$( bc <<< "scale=2; $tx / $s" )
 
-        
+        let t_total=t_total+tx
+        let r_total=r_total+rx
         
 
         case $opv in
@@ -140,6 +151,9 @@ function print_dados() {
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tx Kb" "$rr Kb"
                 fi
         esac
+
+        dicform_r[$i]=$(echo $t_total)
+        dicform_r[$i]=":"$(echo $r_total)
         
     done
    
@@ -196,18 +210,16 @@ while getopts :bc:lmrRtTvk option ; do
 done
 # tempo intruduzido, argumento obrigatório, falta fazer o assert
 s=$1
-#rascunho do loop que já cá estava
 
 
-
+assert
 # Dados iniciais
 
 getinterfaces
 for i in "${interfaces[@]}"; do
     dicform_i[$i]=$(ifconfig $i | sort | grep packets | grep TX | awk '{print $5}')
     dicform_i[$i]+=":"$(ifconfig $i | sort | grep packets | grep RX | awk '{print $5}')
-    dicform_r[$i]=$(ifconfig $i | sort | grep packets | grep TX | awk '{print $5}')
-    dicform_r[$i]+=":"$(ifconfig $i | sort | grep packets | grep RX | awk '{print $5}')
+    dicform_r[$i]="0:0"
 done
 sleep $s
 while true ; do

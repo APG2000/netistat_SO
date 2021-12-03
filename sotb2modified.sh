@@ -2,11 +2,11 @@
 #ifconfig -a | sed 's/[ \t].*//;/^$/d' |cut -d ":" -f1  to get interfaces
 
 #inclui o ficheiro para printar com fonts
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-. "$DIR/fonts.sh"
+#DIR="${BASH_SOURCE%/*}"
+#if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+#. "$DIR/fonts.sh"
 
-exitcode=$?
+#exitcode=$?
 
 assert() {
   re='^[0-9]+$'
