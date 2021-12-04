@@ -33,7 +33,7 @@ dicform_r=()
 
 
 function getinterfaces() {
-    for inter in $(ifconfig -a | sed 's/[ \t].*//;/^$/d' | cut -d ":" -f1); do
+    for inter in $(ifconfig -a | sed 's/[ \t].*//;/^$/d' | cut -d ":" -f1); do 
         interfaces+=($inter)
     done
 }
@@ -180,7 +180,7 @@ done
 
 # Concatenação de  -r ás opções do sort
 
-if [[ reverse -eq 1 ]] ; then
+if [[ reverse -eq 0 ]] ; then
     order_of_sort=$(echo $order_of_sort)" -r"
 fi 
 
