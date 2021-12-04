@@ -20,6 +20,8 @@ assert() { #verifica a quantidade de argumentos
 
 s=$1
 n_arg=$#
+
+
 assert
 declare -A dicform_i
 dicform_i=()
@@ -155,7 +157,7 @@ reverse=0
 opv=0
 loop=0
 head=  #what is this ??
-p_size=1
+
 
 # Este comando executa antes de tudo lendo as opções -- A String começa sempre por :, e quando uma opção leva argumentos tbm como vemos na opção c. Além disso para sempre antes do primeiro argumento que ñ é uma opção
 while getopts bc:lmp:rRtTvk option ; do
@@ -167,9 +169,7 @@ while getopts bc:lmp:rRtTvk option ; do
     k)  opv=2;;
     l)  loop=1;;
     m)  opv=1;;
-    p)  n_head="-"$(echo $OPTARG) ;
-        p_size=$OPTARG
-    ;;
+    p)  n_head="-"$(echo $OPTARG);;
     r)  order_of_sort="-k 3 -n";;
     R)  order_of_sort="-k 5 -n";;
     t)  order_of_sort="-k 2 -r";;  ## so here is -r to make it iqual to the pdf example
@@ -196,7 +196,6 @@ dicform_r=()
 function print_dados() {
     getdicform
     for i in "${interfaces[@]}"; do
-    
         linha_i="$i ${dicform_i[$i]}"
         linha_f="$i ${dicform_f[$i]}"
         linha_r="$i ${dicform_r[$i]}"
