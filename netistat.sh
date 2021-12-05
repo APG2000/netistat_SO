@@ -83,11 +83,8 @@ function print_dados() {
         let tx=tx_f-tx_i
 
         let t_total=t_inicial+tx
-        echo "$t_inicial --> t_inicial"
-        echo "$t_total --> t_total"
+       
         let r_total=r_inicial+rx
-        echo "$r_total --> r_total"
-        echo "$r_inicial --> r_inicial"
 
     
         rr=$( bc <<< "scale=2; $rx / $s" )
@@ -133,9 +130,6 @@ function print_dados() {
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tx Kb" "$rr Kb"
                 fi
         esac
-        dicform_r[$i]=$(echo $t_total)
-        dicform_r[$i]=":"$(echo $r_total)
-
     done
    
 }
