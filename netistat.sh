@@ -82,9 +82,9 @@ function print_dados() {
      
         let tx=tx_f-tx_i
 
-        let t_total=t_inicial+tx
+        let t_total=tx_f-t_inicial
        
-        let r_total=r_inicial+rx
+        let r_total=rx_f-r_inicial
 
     
         rr=$( bc <<< "scale=2; $rx / $s" )
