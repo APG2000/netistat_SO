@@ -33,7 +33,7 @@ dicform_r=()
 
 
 function getinterfaces() {
-    for inter in $(ifconfig -a | sed 's/[ \t].*//;/^$/d' | cut -d ":" -f1); do 
+    for inter in $(ifconfig -a | grep -E "inet|ether" -v | grep : | awk '{print $1}' | cut -d ":" -f1); do 
         interfaces+=($inter)
     done
 }
@@ -78,20 +78,16 @@ function print_dados() {
         tx_f=$(echo $linha_f | grep $i | awk '{print $2}' | cut -d ":" -f1)
 
 
-        r_total=$(echo $linha_r | grep $i | awk '{print $2}' | cut --complement -d ":" -f1)
-    
-        t_total=$(echo $linha_r | grep $i | awk '{print $2}' | cut -d ":" -f1)
-        
-        
-        
-
         let rx=rx_f-rx_i
      
         let tx=tx_f-tx_i
 
         let t_total=t_inicial+tx
+        echo "$t_inicial --> t_inicial"
+        echo "$t_total --> t_total"
         let r_total=r_inicial+rx
-        
+        echo "$r_total --> r_total"
+        echo "$r_inicial --> r_inicial"
 
     
         rr=$( bc <<< "scale=2; $rx / $s" )
@@ -103,9 +99,9 @@ function print_dados() {
         case $opv in
             0)
                 if [[ loop -ne 0 ]]; then
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B" "$rr B" "$t_total B" "$r_total B"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B/s" "$rr B/s" "$t_total B" "$r_total B"
                 else
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B" "$rr B"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B/s" "$rr B/s"
                 fi
 
                 ;;
@@ -118,7 +114,7 @@ function print_dados() {
                 tr=$(bc <<<"scale=2;$tr/1000000")
 
                 if [[ $loop -ne 0 ]]; then
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B" "$rr B" "$t_total B" "$r_total B"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx MbB" "$rx Mb" "$tr Mb/s" "$rr Mb/s" "$t_total Mb" "$r_total Mb"
                 else
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Mb" "$rx Mb" "$tx Mb" "$rr Mb"
                 fi
@@ -132,7 +128,7 @@ function print_dados() {
                 tr=$(bc <<<"scale=2;$tr/1000")
 
                 if [[ $loop -ne 0 ]]; then
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B" "$rr B" "$t_total B" "$r_total B"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tr Kb/s" "$rr Kb/s" "$t_total Kb" "$r_total Kb"
                 else
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tx Kb" "$rr Kb"
                 fi
@@ -209,14 +205,11 @@ function print_dados() {
         rx_f=$(echo $linha_f | grep $i | awk '{print $2}' | cut --complement -d ":" -f1)
         tx_f=$(echo $linha_f | grep $i | awk '{print $2}' | cut -d ":" -f1)
 
-        r_total=$(echo $linha_r | grep $i | awk '{print $2}' | cut --complement -d ":" -f1)
-        t_total=$(echo $linha_r | grep $i | awk '{print $2}' | cut -d ":" -f1)
-        
         let rx=rx_f-rx_i     
         let tx=tx_f-tx_i
 
-        let t_total=t_inicial+tx
-        let r_total=r_inicial+rx
+        let r_total=rx_f-r_inicial
+        let t_total=tx_f-t_inicial
         
         rr=$( bc <<< "scale=2; $rx / $s" )
         tr=$( bc <<< "scale=2; $tx / $s" )
@@ -224,7 +217,7 @@ function print_dados() {
         case $opv in # ver se é para imprimir em bytes/Mb ou Kb
             0)
                 if [[ loop -ne 0 ]]; then
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B" "$rr B" "$t_total B" "$r_total B"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B/s" "$rr B/s" "$t_total B" "$r_total B"
                 else
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx B" "$rx B" "$tr B" "$rr B"
                 fi
@@ -241,7 +234,7 @@ function print_dados() {
                 r_t=$(bc <<<"scale=2;$r_total/1000000")
 
                 if [[ $loop -ne 0 ]]; then
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Mb" "$rx Mb" "$tr Mb" "$rr Mb" "$t_t Mb" "$r_t Mb"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Mb" "$rx Mb" "$tr Mb/s" "$rr Mb/s" "$t_t Mb" "$r_t Mb"
                 else
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Mb" "$rx Mb" "$tx Mb" "$rr Mb"
                 fi
@@ -258,14 +251,12 @@ function print_dados() {
                 r_t=$(bc <<<"scale=2;$r_total/1000")
 
                 if [[ $loop -ne 0 ]]; then
-                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tr Kb" "$rr Kb" "$t_t Kb" "$r_t Kb"
+                    printf "%-10s\t%10s\t%10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tr Kb/s" "$rr Kb/s" "$t_t Kb" "$r_t Kb"
                 else
                     printf "%-10s\t%10s\t%10s\t%10s\t%10s\n" "$i" "$tx Kb" "$rx Kb" "$tx Kb" "$rr Kb"
                 fi
         esac
 
-        dicform_r[$i]=$(echo $t_total)
-        dicform_r[$i]=":"$(echo $r_total)
 
     done
    
@@ -276,7 +267,8 @@ function inicial_setup(){ #Setup inicial
     for i in "${interfaces[@]}"; do
         dicform_i[$i]=$(ifconfig $i | sort | grep packets | grep TX | awk '{print $5}')
         dicform_i[$i]+=":"$(ifconfig $i | sort | grep packets | grep RX | awk '{print $5}')
-        dicform_r[$i]="0:0"
+        dicform_r[$i]=$(ifconfig $i | sort | grep packets | grep TX | awk '{print $5}')
+        dicform_r[$i]+=":"$(ifconfig $i | sort | grep packets | grep RX | awk '{print $5}')
     done
     if [[ $loop -eq 0 ]] ; then
         printf "%-10s\t%10s\t%10s\t%10s\t%10s\n\n" "NETIF" "TX" "RX" "TRATE" "RRATE"
@@ -305,7 +297,7 @@ if [[ $loop -eq 1 ]]; then # parte do loop caso seja selecionada a opção -l
     while true ; do
           if [[ $c_option == "true" ]]
     then
-    print_dados |  sort $order_of_sort | head $n_head |grep $grepby # parte não loop
+    print_dados |  sort $order_of_sort |grep $grepby | head $n_head # parte não loop
     else
 
     print_dados |  sort $order_of_sort | head $n_head # parte não loop
@@ -321,7 +313,7 @@ if [[ $loop -eq 1 ]]; then # parte do loop caso seja selecionada a opção -l
 else
     if [[ $c_option == "true" ]]
     then
-    print_dados |  sort $order_of_sort | head $n_head |grep $grepby # parte não loop
+    print_dados |  sort $order_of_sort  |grep $grepby | head $n_head # parte não loop
     else
 
     print_dados |  sort $order_of_sort | head $n_head # parte não loop
