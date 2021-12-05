@@ -1,8 +1,14 @@
 # Vai bustar o fincheiro para o print inicial
 
-
-assert() { #verifica a quantidade de argumentos
+function assert() { #verifica a quantidade de argumentos
     re='^[0-9]+$'
+
+    if [ $n_arg -le 2 ]; then # ver se no minimo temos um argumento
+        echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
+        exit $E_ASSERT_FAILED
+    fi
+
+    
     if ! [[ $s =~ $re ]]; then # se o argumento do tempo nao for um numero e o numero total de argumentos nao for igual ou superior a 2 o programa nao corre
 
         if [[ $n_arg -lt 2 ]]; then
@@ -10,15 +16,19 @@ assert() { #verifica a quantidade de argumentos
             exit $E_ASSERT_FAILED
         fi
     fi
-    if [ $n_arg -le 0 ]; then
-        echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
+    
+    if [ $p_size -le 0 ]; then # ver se o numero de interfaces da opção p é maior que zero
+        echo "Option -p must have positive arguments"
         exit $E_ASSERT_FAILED
     fi
-
 }
 
 s=$1
 n_arg=$#
+
+
+
+assert
 
 declare -A dicform_i
 dicform_i=()
@@ -157,7 +167,7 @@ head=
 p_size=1
 
 # Este comando executa antes de tudo lendo as opções -- A String começa sempre por :, e quando uma opção leva argumentos tbm como vemos na opção c. Além disso para sempre antes do primeiro argumento que ñ é uma opção
-while getopts bc:lmp:rRtTvk option ; do
+while getopts :bc:lmp:rRtTvk option ; do
     case $option in
     c)  regex="grep \"$(echo $OPTARG)\" " ;;
     k)  opv=2;;
@@ -176,7 +186,7 @@ done
 
 # Concatenação de  -r ás opções do sort
 
-if [[ reverse -eq 1 ]] ; then
+if [[ reverse -eq 0 ]] ; then
     order_of_sort=$(echo $order_of_sort)" -r"
 fi 
 
@@ -186,31 +196,11 @@ dicform_i=()
 declare -A dicform_f
 dicform_f=()
 
+
 declare -A dicform_r
 dicform_r=()
 
-function assert() { #verifica a quantidade de argumentos
-    re='^[0-9]+$'
 
-    if [ $n_arg -le 2 ]; then # ver se no minimo temos um argumento
-        echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
-        exit $E_ASSERT_FAILED
-    fi
-
-    
-    if ! [[ $s =~ $re ]]; then # se o argumento do tempo nao for um numero e o numero total de argumentos nao for igual ou superior a 2 o programa nao corre
-
-        if [[ $n_arg -lt 2 ]]; then
-            echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
-            exit $E_ASSERT_FAILED
-        fi
-    fi
-    
-    if [ $p_size -le 0 ]; then # ver se o numero de interfaces da opção p é maior que zero
-        echo "Option -p must have positive arguments"
-        exit $E_ASSERT_FAILED
-    fi
-}
 # Imprime dados -- Esta função está separada para facilmente ordenarmos os dados dando 'pipe' da função ao sort
 function print_dados() {
     getdicform
@@ -236,7 +226,14 @@ function print_dados() {
         let tx=tx_f-tx_i
 
         let t_total=t_inicial+tx
+        echo "$t_inicial --> t_inicial"
+        echo "$t_total --> t_total"
         let r_total=r_inicial+rx
+        echo "$r_total --> r_total"
+        echo "$r_inicial --> r_inicial"
+
+        dicform_r[$i]=$(echo $t_total)
+        dicform_r[$i]=":"$(echo $r_total)
         
         rr=$( bc <<< "scale=2; $rx / $s" )
         tr=$( bc <<< "scale=2; $tx / $s" )
@@ -284,15 +281,14 @@ function print_dados() {
                 fi
         esac
 
-        dicform_r[$i]=$(echo $t_total)
-        dicform_r[$i]=":"$(echo $r_total)
+        
 
     done
    
 }
 
 function inicial_setup(){ #Setup inicial
-    assert
+ 
     getinterfaces
     for i in "${interfaces[@]}"; do
         dicform_i[$i]=$(ifconfig $i | sort | grep packets | grep TX | awk '{print $5}')
