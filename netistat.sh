@@ -291,7 +291,7 @@ if [[ $loop -eq 1 ]]; then # parte do loop caso seja selecionada a opção -l
     while true ; do
           if [[ $c_option == "true" ]]
     then
-    print_dados |  sort $order_of_sort |grep $grepby | head $n_head # parte não loop
+    print_dados |  sort $order_of_sort |grep ^$grepby$ | head $n_head # parte não loop # ^ e $ para melhorar o regex
     else
 
     print_dados |  sort $order_of_sort | head $n_head # parte não loop
@@ -307,7 +307,7 @@ if [[ $loop -eq 1 ]]; then # parte do loop caso seja selecionada a opção -l
 else
     if [[ $c_option == "true" ]]
     then
-    print_dados |  sort $order_of_sort  |grep $grepby | head $n_head # parte não loop
+    print_dados |  sort $order_of_sort  |grep ^$grepby$ | head $n_head # parte não loop  # ^ e $ para melhorar o regex
     else
 
     print_dados |  sort $order_of_sort | head $n_head # parte não loop
