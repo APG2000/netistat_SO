@@ -452,7 +452,7 @@ assert() -> getops -> initial_setup() ->  the_real_thing -> print_dados()^n , n
 
 **Interfaces/Mb/tx**
 
-./netistat.sh -p 3 -c regex -m -t 4
+./netistat.sh -p 3 -c "l.*" -m -t 4
 
 **Interfaces/b/p/reverse**
 
