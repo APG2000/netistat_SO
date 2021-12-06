@@ -166,7 +166,7 @@ while getopts bc:lmp:rRtTvk option ; do
     p)  n_head="-"$(echo $OPTARG);;
     r)  order_of_sort="-k 3 -n";;
     R)  order_of_sort="-k 5 -n";;
-    t)  order_of_sort="-k 2 -r";;  ## so here is -r to make it iqual to the pdf example
+    t)  order_of_sort="-k 2 -n";;  
     T)  order_of_sort="-k 4 -n";;
     v)  reverse=1;;
     esac
