@@ -3,24 +3,28 @@
 
 
 assert() { #verifica a quantidade de argumentos
-    re='^[0-9]+$'
-    if ! [[ $s =~ $re ]]; then # se o argumento do tempo nao for um numero e o numero total de argumentos nao for igual ou superior a 2 o programa nao corre
-
-        if [[ $n_arg -lt 2 ]]; then
-            echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
-            exit $E_ASSERT_FAILED
-        fi
-    fi
     if [ $n_arg -le 0 ]; then
         echo "Assertion failed: parâmetro obrigatório em falta (Tempo em segundos )"
         exit $E_ASSERT_FAILED
     fi
+ 
+ 
+    if ! [[ $s =~ $re ]] ; then # se o argumento final não for um numero o programa não corre
+        echo "O ultimo argumento tem de ser o tempo"
+        exit $E_ASSERT_FAILED
+    fi
+ 
+
+   
+
 
 }
 
-s=$1
-n_arg=$#
 
+s=${@: -1} 
+n_arg=$#
+re='^[0-9]+$' 
+assert
 
 assert
 declare -A dicform_i
@@ -134,19 +138,13 @@ function print_dados() {
    
 }
 
-# Imprime a tabela -- output
-
-
-n_arg=$#
-s=${@: -1}
 
 # Opções usadas
 order_of_sort=""
 reverse=0
-#regex="cat" dont need 
 opv=0
 loop=0
-head=  #what is this ??
+head=  
 
 
 # Este comando executa antes de tudo lendo as opções -- A String começa sempre por :, e quando uma opção leva argumentos tbm como vemos na opção c. Além disso para sempre antes do primeiro argumento que ñ é uma opção
@@ -155,6 +153,12 @@ while getopts bc:lmp:rRtTvk option ; do
     c)
     c_option="true"
     grepby=$OPTARG
+
+     if  [[ $grepby =~ $re ]] || [[ $grepby == "" ]]; then
+        
+        echo "Por favor indique uma regex valida (exemplo l.*)"
+        exit $E_ASSERT_FAILED
+    fi
      ;;
     k)  opv=2;;
     l)  loop=1;;
